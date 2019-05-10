@@ -28,42 +28,56 @@
   </el-aside>
   <el-container>
     <el-main>
-    <el-table v-if="show" :data="painlist" @sort-change="sortchange" border style="width: 100%">
-    <el-table-column prop="_id" label="id" sortable="custom" > </el-table-column>
-    <el-table-column prop="user_name" label="姓名"></el-table-column>
-    <el-table-column prop="user_age" label="年龄" sortable="custom"> </el-table-column>
-    <el-table-column prop="user_hobby" label="爱好"></el-table-column>
-    <el-table-column prop="mtext" label="备注"> </el-table-column>
-    <el-table-column fixed="right" label="操作">
-      <template slot-scope="scope">
-         <el-button
-          size="mini"
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+        <el-form-item label="属性"> 
+          <el-cascader :options="options" v-model="selectedOptions" > </el-cascader>
+        </el-form-item>
+        <el-form-item label="取值">
+          <el-input v-model="selectvalue" placeholder="请输入内容"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">查询</el-button>
+          </el-form-item>
+        </el-form>
+
+<el-container>
+  <el-table v-if="show" :data="painlist" @sort-change="sortchange" border style="width: 100%">
+  <el-table-column prop="_id" label="id" sortable="custom" > </el-table-column>
+  <el-table-column prop="user_name" label="姓名"></el-table-column>
+  <el-table-column prop="user_age" label="年龄" sortable="custom"> </el-table-column>
+  <el-table-column prop="user_hobby" label="爱好"></el-table-column>
+  <el-table-column prop="mtext" label="备注"> </el-table-column>
+  <el-table-column fixed="right" label="操作">
+    <template slot-scope="scope">
         <el-button
-          size="mini"
-          type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
-  <el-table v-else :data="cipherlist"  @sort-change="sortchange" border style="width: 100%">
-    <el-table-column prop="_id" label="id" sortable="custom"  > </el-table-column>
-    <el-table-column prop="user_name" label="姓名"></el-table-column>
-    <el-table-column prop="user_age" label="年龄" sortable="custom" > </el-table-column>
-    <el-table-column prop="user_hobby" label="爱好"></el-table-column>
-    <el-table-column prop="mtext" label="备注"> </el-table-column>
-    <el-table-column fixed="right" label="操作">
-      <template slot-scope="scope">
-         <el-button
-          size="mini"
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+        size="mini"
+        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+      <el-button
+        size="mini"
+        type="danger"
+        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+    </template>
+  </el-table-column>
+</el-table>
+<el-table v-else :data="cipherlist"  @sort-change="sortchange" border style="width: 100%">
+  <el-table-column prop="_id" label="id" sortable="custom"  > </el-table-column>
+  <el-table-column prop="user_name" label="姓名"></el-table-column>
+  <el-table-column prop="user_age" label="年龄" sortable="custom" > </el-table-column>
+  <el-table-column prop="user_hobby" label="爱好"></el-table-column>
+  <el-table-column prop="mtext" label="备注"> </el-table-column>
+  <el-table-column fixed="right" label="操作">
+    <template slot-scope="scope">
         <el-button
-          size="mini"
-          type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+        size="mini"
+        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+      <el-button
+        size="mini"
+        type="danger"
+        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+    </template>
+  </el-table-column>
+</el-table>
+</el-container>
     </el-main>
   </el-container>
   </el-container>
@@ -84,19 +98,20 @@ export default {
         cipherlist:Array(20).fill(item),
         showtable:Array(20).fill(item),
         show:true,
-        options:[{
-          value: 'id',
-          label: '用户id'
-        }, {
-          value: 'name',
-          label: '用户姓名'
-        }, {
-          value: 'age',
-          label: '用户年龄'
-        }, {
-          value: 'hobby',
-          label: '用户爱好'
-        }],
+        selectvalue :'',
+        selectedOptions :'',
+        selectvalue:'',
+        options:[
+            {
+              value:'id' ,label: 'id',children:[{value: '>',label: '大于'},{value: '=',label: '等于'},{value: '<',label: '小于'}]},
+            {
+              value:'name' ,label:'姓名' ,children:[{value: '=',label: '等于'}]},
+            { 
+              value:'age',label: '年龄',children:[{value: '>',label: '大于'},{value: '=',label: '等于'},{value: '<',label: '小于'}]},
+            {
+              value:'hobby',label: '爱好' ,children:[{value: '=',label: '等于'}]},
+            {
+              value: 'mtxt' ,label:'备注',children:[{value: '=',label: '等于'}]}]
       }
   },
   mounted(){
@@ -132,6 +147,18 @@ export default {
       that.showtable=that.painlist
       })
 
+    },
+    onSubmit(){
+      var options=this.selectedOptions
+      var value=this.selectvalue
+       var that=this
+      console.log(typeof options[0])
+      console.log(typeof value)
+      this.$axios.get('http://localhost:8080//select',{params: {label1: options[0],label2: options[1],value: value}} ).then(function (response) {
+      console.log(response.data);
+      that.painlist=response.data[0]
+      that.cipherlist=response.data[1]
+      })
     }
   }
   
